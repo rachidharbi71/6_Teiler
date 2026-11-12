@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1️⃣ Teiler – Stationlernen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --p-paper:oklch(0.985 0.008 90);--p-ink:oklch(0.21 0.018 80);--p-yellow:oklch(0.94 0.19 105);
+    --p-coral:oklch(0.68 0.19 30);--p-blue:oklch(0.64 0.14 240);--p-mint:oklch(0.93 0.09 145);
+    --p-softblue:oklch(0.93 0.04 240);--p-white:oklch(0.995 0.003 90);
+    --bg:var(--p-paper);--surface:var(--p-white);--text:var(--p-ink);
+    --muted:oklch(0.43 0.02 80);--line:oklch(0.85 0.018 85);
+    --radius:18px;--max:1180px;--shadow:0 10px 30px oklch(0.21 0.018 80 / .08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:Figtree,'Trebuchet MS',sans-serif;background:var(--bg);color:var(--text);
+       line-height:1.65;font-size:17px;min-height:100dvh;-webkit-font-smoothing:antialiased;}
+  button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  h1,h2,h3,h4{font-family:'Plus Jakarta Sans',Figtree,sans-serif;line-height:1.12;letter-spacing:-.03em;margin:0;}
+  :focus-visible{outline:3px solid var(--p-coral);outline-offset:3px;}
+  /* ===== Topbar ===== */
+  header{position:relative;max-width:var(--max);margin:0 auto;padding:24px 40px 0;display:flex;flex-direction:column;gap:4px;}
+  header h1{font-size:clamp(34px,5vw,56px);font-weight:800;max-width:80%;}
+  header p{color:var(--muted);font-size:17px;margin:6px 0 0;}
+  .logo-top{position:absolute;right:40px;top:20px;width:76px;height:76px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .logo-top svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 0 oklch(0.21 0.018 80 / .15));}
+  .logo-klasse{font-weight:800;font-size:.85rem;color:var(--muted);}
+  #btn-en{position:absolute;right:130px;top:26px;z-index:5;background:var(--surface);color:var(--text);
+          border:1.5px solid var(--text);border-radius:999px;padding:.5rem 1.15rem;font-weight:700;font-size:.9rem;
+          min-height:44px;animation:enblink 2s ease-in-out infinite;touch-action:manipulation;
+          transition:transform .18s,background .18s,box-shadow .18s;}
+  #btn-en:hover{transform:translateY(-2px);box-shadow:0 4px 0 var(--text);background:var(--p-yellow);}
+  #btn-en:active{transform:translateY(1px);box-shadow:none;}
+  #btn-en.aktiv{background:var(--p-coral);color:#fff;animation:none;}
+  @keyframes enblink{0%,100%{box-shadow:0 3px 0 oklch(0.21 0.018 80 / .2);}50%{box-shadow:0 0 0 4px oklch(0.64 0.14 240 / .35);}}
+  /* ===== Layout ===== */
+  main{max-width:var(--max);margin:0 auto;padding:8px 40px 70px;}
+  .glass{background:var(--surface);border:1.5px solid var(--text);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .einheit{padding:28px;margin-bottom:28px;}
+  .einheit h2{font-size:clamp(30px,4vw,44px);margin-bottom:4px;}
+  .untertitel{color:var(--muted);font-style:italic;margin-bottom:10px;font-size:1.05em;}
+  /* ===== Startwahl ===== */
+  .startwahl{margin:1.1rem 0 .4rem;}
+  .startwahl>p{font-weight:800;margin-bottom:.5rem;}
+  .wahlbtn{display:block;width:100%;min-height:72px;border:2px solid var(--text);border-radius:16px;font-size:1rem;
+           font-weight:800;cursor:pointer;padding:.9rem 1.2rem;margin:.5rem 0;background:var(--surface);color:var(--text);
+           box-shadow:0 5px 0 var(--text);transition:transform .15s,box-shadow .15s;text-align:left;touch-action:manipulation;}
+  .wahlbtn:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--text);}
+  .wahlbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--text);}
+  .wahlbtn small{display:block;font-weight:600;font-size:.82rem;opacity:.85;margin-top:.15rem;}
+  .wbtn-hilfe{background:var(--p-yellow);}
+  .wbtn-schwer{background:var(--surface);}
+  .wahlbtn.aktiv{outline:4px solid var(--p-coral);transform:scale(1.02);}
+  /* Fortschritt als Chip */
+  .fortschritt{display:none;margin:.5rem 0 1rem;padding:.7rem .95rem;background:var(--surface);border:1.5px solid var(--text);
+               border-radius:14px;box-shadow:0 4px 0 var(--text);}
+  .fbar{height:14px;background:var(--line);border-radius:20px;overflow:hidden;margin-bottom:.4rem;}
+  #ffill{height:100%;width:0;background:var(--p-coral);border-radius:20px;transition:width .5s;}
+  #ftext{font-weight:800;font-size:.92rem;}
+  /* ===== Einstieg / Bruecke ===== */
+  .einstieg{background:var(--surface);border:1.5px solid var(--text);border-radius:var(--radius);
+            padding:1.1rem 1.3rem;margin:.9rem 0;font-size:.97rem;box-shadow:var(--shadow);}
+  .einstieg b{color:var(--p-coral);}
+  .bruecke{display:none;margin:.7rem 0;background:var(--p-softblue);border:2px solid var(--text);
+           padding:.8rem 1rem;border-radius:12px;font-size:.93rem;font-weight:600;
+           animation:brBlink 7s ease-in-out infinite;}
+  .bruecke b:first-child{color:var(--p-blue);}
+  @keyframes brBlink{0%,100%{border-color:var(--text);}50%{border-color:var(--p-coral);}}
+  .scene{display:flex;gap:.8rem;align-items:center;justify-content:center;flex-wrap:wrap;padding:.7rem 0 .3rem;min-height:50px;}
+  /* ===== Stationen ===== */
+  .aufgabe{padding:1.2rem 1.3rem;margin:1rem 0;font-size:.97rem;border-top:1.5px solid var(--text);background:transparent;}
+  .aufgabe:first-of-type{border-top:0;}
+  .t1{background:var(--p-softblue);}
+  .t2{background:var(--p-mint);}
+  .t3{background:var(--p-yellow);}
+  .t4{background:oklch(0.95 0.03 30);}
+  .t5{background:var(--p-softblue);}
+  .aufgabe h4{display:inline-block;background:var(--p-ink);color:var(--p-paper);padding:.35rem 1.05rem;border-radius:12px;
+              box-shadow:0 4px 0 oklch(0.21 0.018 80 / .35);font-size:1.02rem;margin-bottom:.7rem;letter-spacing:.02em;
+              font-family:'Plus Jakarta Sans',sans-serif;}
+  /* ===== Auswahl-Buttons ===== */
+  .mc-option{display:block;width:100%;text-align:left;margin:.45rem 0;padding:.75rem 1rem;border:1.5px solid var(--text);
+    border-radius:12px;min-height:48px;background:var(--surface);font-size:.95rem;color:var(--text);font-weight:600;
+    transition:transform .15s,background .15s,box-shadow .15s;touch-action:manipulation;}
+  .mc-option:hover{transform:translateY(-2px);background:var(--p-yellow);box-shadow:0 4px 0 var(--text);}
+  .mc-option.richtig{background:var(--p-mint);font-weight:800;}
+  .mc-option.falsch{background:oklch(0.91 0.06 30);}
+  .bg-option{background:oklch(0.98 0.01 90);}
+  .begruende{display:none;margin-top:.8rem;padding:.9rem;background:var(--p-softblue);border-radius:14px;border:1.5px dashed var(--text);}
+  .begruende p{font-weight:800;color:var(--p-blue);margin-bottom:.4rem;}
+  .bfeedback{font-size:.9rem;font-weight:800;margin-top:.4rem;display:none;}
+  .bfeedback.ok{display:block;color:oklch(0.43 0.13 145);}
+  .bfeedback.nope{display:block;color:var(--p-coral);}
+  .feedback{font-size:.9rem;font-weight:800;margin-top:.4rem;display:none;}
+  .feedback.ok{display:block;color:oklch(0.43 0.13 145);}
+  .feedback.nope{display:block;color:var(--p-coral);}
+  .msg{min-height:1.4em;font-weight:800;font-size:.92rem;margin-top:.4rem;}
+  .msg.ok{color:oklch(0.43 0.13 145);} .msg.nope{color:var(--p-coral);}
+  /* ===== Buttons ===== */
+  .btn,.btn2{background:var(--surface);color:var(--text);border:1.5px solid var(--text);border-radius:999px;
+             padding:.6rem 1.3rem;font-weight:700;font-size:.9rem;min-height:46px;margin:.5rem .35rem 0 0;
+             transition:transform .15s,box-shadow .15s,background .15s;touch-action:manipulation;}
+  .btn:hover,.btn2:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--text);background:var(--p-yellow);}
+  .btn:active,.btn2:active{transform:translateY(1px);box-shadow:none;}
+  /* ===== Brueche ===== */
+  .fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .18em;font-size:.8em;line-height:1.15;}
+  .fr>span:first-child{border-bottom:2px solid currentColor;padding:0 .3em;font-weight:700;}
+  .fr>span:last-child{padding:0 .3em;}
+  /* ===== Lueckentext ===== */
+  .gap{display:inline-block;min-width:88px;min-height:1.5em;padding:.1rem .5rem;border-bottom:3px solid var(--text);
+       text-align:center;background:var(--p-yellow);border-radius:8px 8px 0 0;font-weight:800;vertical-align:bottom;cursor:pointer;}
+  .gap.ok{background:var(--p-mint);border-color:oklch(0.43 0.13 145);}
+  .gap.bad{background:oklch(0.91 0.06 30);border-color:var(--p-coral);}
+  .pool{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;margin:.8rem 0 .2rem;padding:.75rem .8rem;
+        background:var(--surface);border-radius:14px;border:1.5px dashed var(--text);}
+  .pool-lab{font-size:.8rem;font-weight:800;color:var(--muted);}
+  .chip{display:inline-block;padding:.35rem 1rem;border-radius:999px;font-size:.95rem;cursor:grab;min-height:44px;
+        background:var(--surface);border:1.5px solid var(--text);font-weight:700;user-select:none;-webkit-user-select:none;
+        touch-action:none;transition:transform .12s,box-shadow .12s;}
+  .chip:hover{transform:translateY(-2px);box-shadow:0 3px 0 var(--text);background:var(--p-yellow);}
+  .chip i{font-style:italic;}
+  .chip.verwendet{opacity:.3;pointer-events:none;}
+  .ghost{position:fixed;z-index:999;pointer-events:none;opacity:.85;transform:scale(1.08) rotate(-2deg);box-shadow:0 8px 20px rgba(0,0,0,.25);}
+  /* ===== Foerderbox / Zahlenkasten ===== */
+  .foerderbox{padding:1.1rem 1.2rem;margin:.9rem 0;background:var(--p-softblue);border:1.5px solid var(--text);
+               border-radius:var(--radius);box-shadow:0 4px 0 oklch(0.21 0.018 80 / .2);}
+  .foerderbox b{color:var(--text);}
+  .zahlenkasten{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin:.7rem 0;}
+  .ztile{min-height:64px;font-size:1.5rem;font-weight:800;color:var(--text);border:1.5px solid var(--text);border-radius:14px;
+         cursor:pointer;background:var(--surface);touch-action:manipulation;transition:transform .12s,box-shadow .12s;}
+  .ztile:hover{transform:translateY(-2px);box-shadow:0 4px 0 var(--text);background:var(--p-yellow);}
+  .ztile:active{transform:translateY(2px);box-shadow:none;}
+  .ztile:not(:disabled){animation:tileblink 2.2s ease-in-out infinite;}
+  .ztile:nth-child(2n):not(:disabled){animation-delay:.35s;}
+  .ztile:nth-child(3n):not(:disabled){animation-delay:.7s;}
+  @keyframes tileblink{0%,100%{box-shadow:0 3px 0 oklch(0.21 0.018 80 / .25);}50%{box-shadow:0 0 0 4px oklch(0.94 0.19 105 / .8);}}
+  .ztile:disabled{opacity:.6;cursor:not-allowed;}
+  .ztile.zok-tile{background:var(--p-mint);}
+  .ztile.zbad-tile{background:oklch(0.85 0.09 30);color:#fff;}
+  .zantwort{border:2px solid var(--text);border-radius:10px;width:95px;text-align:center;font-size:1.15rem;font-weight:800;
+            padding:.3rem .2rem;font-family:inherit;background:var(--surface);color:var(--text);}
+  .zantwort:disabled{opacity:.55;cursor:not-allowed;}
+  .zantwort.zok{border-color:oklch(0.43 0.13 145);background:var(--p-mint);}
+  .zantwort.zbad{border-color:var(--p-coral);background:oklch(0.91 0.06 30);}
+  .zfb{font-weight:800;font-size:.95rem;margin-top:.4rem;min-height:1.3em;}
+  .faufgabe{min-height:1.6em;font-size:1.05rem;font-weight:800;margin-top:.3rem;}
+  .themenaufgabe{margin-top:.7rem;border-top:2px dashed var(--text);padding-top:.6rem;}
+  .themenaufgabe>b{color:var(--text);}
+  /* ===== Merke ===== */
+  .merke-bau{padding:1.2rem 1.3rem;margin:.9rem 0;background:var(--p-yellow);border:2px solid var(--text);
+             border-radius:var(--radius);font-size:.97rem;box-shadow:0 5px 0 oklch(0.21 0.018 80 / .25);}
+  .merke-ok{display:none;margin-top:.8rem;padding:1rem 1.2rem;border-radius:14px;background:var(--surface);
+            border:2px solid oklch(0.43 0.13 145);font-size:.93rem;}
+  .merke-titel{font-weight:800;font-size:1.12rem;margin-top:.5rem;}
+  .merke-text{margin-top:.4rem;padding:.7rem .9rem;background:var(--p-mint);border-radius:10px;font-weight:700;}
+  .merke-beispiel{margin-top:.45rem;font-size:.92rem;background:var(--surface);border-radius:10px;padding:.55rem .85rem;border:1px dashed var(--text);}
+  .blink{font-weight:800;animation:blinkdezent 1.6s ease-in-out infinite;display:inline-block;
+         border:3px solid var(--p-coral);border-radius:12px;padding:.5rem .9rem;}
+  @keyframes blinkdezent{0%,100%{opacity:1;}50%{opacity:.45;}}
+  /* ===== Selbsteinschaetzung / Feedback ===== */
+  .check{background:var(--p-softblue);border:2px solid var(--text);padding:1.1rem 1.2rem;border-radius:var(--radius);
+         margin:.9rem 0 .3rem;font-size:.94rem;box-shadow:0 4px 0 oklch(0.21 0.018 80 / .2);}
+  .wkj label{display:flex;align-items:center;gap:.6rem;padding:.5rem .4rem;border-radius:12px;cursor:pointer;margin-top:.35rem;transition:background .15s;}
+  .wkj label:hover{background:oklch(1 0 0 / .6);}
+  .wkj input{display:none;}
+  .wkj .box{flex:0 0 30px;height:30px;border:2.5px solid var(--text);border-radius:8px;background:var(--surface);position:relative;}
+  .wkj input:checked + .box{background:var(--p-ink);}
+  .wkj input:checked + .box::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--p-paper);font-weight:800;font-size:1.2rem;}
+  .wkj input:checked ~ .txt{text-decoration:underline;font-weight:800;}
+  .fb-box{display:none;margin-top:.8rem;background:var(--surface);border:2px solid oklch(0.43 0.13 145);
+          border-radius:14px;padding:.9rem 1rem;font-size:.93rem;}
+  .fb-box p{margin:.35rem 0;}
+  .fb-stark{color:oklch(0.43 0.13 145);}
+  .fb-ehrlich{color:var(--text);}
+  .fb-ziel{color:var(--p-coral);}
+  .fb-motiv{border-top:1.5px dashed var(--text);padding-top:.5rem;font-style:italic;}
+  .fb-hinweis{color:#111;font-weight:800;margin:0;}
+  .fb-fehler{margin-top:.5rem;border-top:1.5px dashed var(--text);padding-top:.5rem;}
+  .fb-karussell{display:flex;align-items:center;justify-content:center;gap:.9rem;margin-top:.6rem;
+                border-top:1.5px dashed var(--text);padding-top:.65rem;flex-wrap:wrap;}
+  #fbk-aktuell{font-weight:800;color:var(--text);min-width:230px;text-align:center;}
+  /* ===== Stepper ===== */
+  .schritt-nav{display:flex;justify-content:center;align-items:center;gap:1rem;margin:.9rem 0 .3rem;padding:.75rem;
+               background:var(--surface);border:1.5px solid var(--text);border-radius:16px;position:sticky;bottom:.6rem;
+               z-index:5;box-shadow:0 -2px 0 oklch(0.21 0.018 80 / .15),0 8px 24px oklch(0.21 0.018 80 / .12);}
+  .sn-stand{font-weight:800;color:var(--text);min-width:120px;text-align:center;font-size:1rem;}
+  /* ===== Szenen-Reste (unsichtbar/unbenutzt, aber definiert) ===== */
+  .kiste{min-width:64px;min-height:56px;background:var(--p-softblue);border:2px dashed var(--text);border-radius:12px;
+         display:flex;flex-wrap:wrap;gap:2px;align-items:center;justify-content:center;padding:4px;font-size:1.5rem;}
+  .boxenreihe{display:flex;gap:1rem;}
+  .klickbar{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .15s;font-size:2rem;display:inline-block;}
+  .klickbar:hover{transform:scale(1.15);}
+  @keyframes shakeX{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .schuetteln{animation:shakeX .35s;border:2px solid var(--p-coral)!important;border-radius:12px;}
+  @keyframes rauf{to{transform:translateY(-140px);opacity:0}}
+  .weg{animation:rauf 1s forwards;}
+  .strahl{display:flex;gap:0;width:100%;max-width:640px;}
+  .strahl .st{flex:1;height:30px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;}
+  .strahl .st.s5{background:var(--p-yellow);}
+  .strahl .st.vs{background:var(--p-yellow)!important;}
+  .strahl .st.vk{background:var(--p-softblue)!important;}
+  .strahl .st.vs.vk{background:var(--p-mint)!important;}
+  .strahl .st.hier{box-shadow:inset 0 0 0 3px var(--text);}
+  .karte{background:var(--surface);border:2px solid var(--text);border-radius:10px;padding:.15rem .5rem;font-weight:800;cursor:pointer;font-size:.95rem;}
+  .karte.sel{border-color:var(--p-coral);background:var(--p-yellow);}
+  .slot{min-width:52px;min-height:38px;background:var(--surface);border:2px dashed var(--text);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+  .slot.frei{cursor:pointer;}
+  .slot.rich{border-color:oklch(0.43 0.13 145);background:var(--p-mint);}
+  .balken16{display:flex;width:100%;max-width:560px;}
+  .balken16 div{flex:1;height:34px;border:1px solid var(--line);}
+  .balken16 div.voll{background:var(--p-yellow);}
+  h3.abschnitt{display:none;}
+  footer{max-width:var(--max);margin:20px auto 0;padding:28px 40px;color:var(--muted);font-size:13px;
+         border-top:1px solid var(--line);}
+  @media (max-width:760px){
+    header,main,footer{padding-left:20px;padding-right:20px;}
+    header h1{font-size:clamp(28px,9vw,40px);max-width:68%;}
+    .logo-top{width:56px;height:56px;right:16px;top:14px;}
+    .logo-klasse{font-size:.7rem;}
+    #btn-en{right:84px;top:16px;padding:.45rem .9rem;font-size:.82rem;min-height:40px;}
+    .einheit{padding:16px;}
+    .zahlenkasten{grid-template-columns:repeat(4,1fr);}
+  }
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div>
+<header>
+  <button id="btn-en" onclick="toggleEng()">English</button>
+  <div class="logo-top"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220" role="img" aria-labelledby="t d">
+  <title id="t">HAR MINT Logo – Das Prisma</title>
+  <desc id="d">Rundes Siegel: H aus Linealen, A als Glasprisma, das Licht in ein Spektrum zerlegt, R aus Lineal und Halbbogen. Darunter der Schriftzug MINT.</desc>
+
+  <!-- Palette: Marine #1a3a6b, Rot #c62828, Blau #2e7fc2 -->
+
+  <!-- Siegel -->
+  <circle cx="110" cy="110" r="96" fill="#ffffff" stroke="#1a3a6b" stroke-width="4"/>
+
+  <!-- Koordinatenkreuz -->
+  <g stroke="#1a3a6b" stroke-width="1" opacity="0.25">
+    <line x1="30" y1="110" x2="190" y2="110"/>
+    <line x1="110" y1="30" x2="110" y2="190"/>
+  </g>
+
+  <!-- H aus Linealen -->
+  <g>
+    <rect x="40" y="62" width="13" height="76" rx="3" fill="#ffffff" stroke="#1a3a6b" stroke-width="2.5"/>
+    <rect x="70" y="62" width="13" height="76" rx="3" fill="#ffffff" stroke="#1a3a6b" stroke-width="2.5"/>
+    <rect x="40" y="93" width="43" height="12" rx="3" fill="#ffffff" stroke="#1a3a6b" stroke-width="2.5"/>
+    <!-- Skalenstriche -->
+    <g stroke="#1a3a6b" stroke-width="1" opacity="0.6">
+      <line x1="44" y1="72" x2="49" y2="72"/><line x1="44" y1="82" x2="49" y2="82"/>
+      <line x1="44" y1="112" x2="49" y2="112"/><line x1="44" y1="122" x2="49" y2="122"/>
+      <line x1="74" y1="72" x2="79" y2="72"/><line x1="74" y1="122" x2="79" y2="122"/>
+      <line x1="50" y1="97" x2="50" y2="102"/><line x1="60" y1="97" x2="60" y2="102"/>
+      <line x1="73" y1="97" x2="73" y2="102"/>
+    </g>
+  </g>
+
+  <!-- A = Prisma -->
+  <g>
+    <polygon points="140,56 100,138 180,138" fill="#ffffff" fill-opacity="0.9" stroke="#1a3a6b" stroke-width="4" stroke-linejoin="round"/>
+    <!-- einfallender Strahl -->
+    <line x1="14" y1="92" x2="118" y2="114" stroke="#1a3a6b" stroke-width="3"/>
+    <!-- austretendes Spektrum -->
+    <line x1="150" y1="126" x2="206" y2="108" stroke="#c62828" stroke-width="3"/>
+    <line x1="150" y1="126" x2="206" y2="118" stroke="#1a3a6b" stroke-width="3"/>
+    <line x1="150" y1="126" x2="206" y2="128" stroke="#2e7fc2" stroke-width="3"/>
+    <line x1="150" y1="126" x2="206" y2="138" stroke="#c62828" stroke-width="3" opacity="0.55"/>
+  </g>
+
+  <!-- R -->
+  <g>
+    <rect x="184" y="62" width="13" height="76" rx="3" fill="#ffffff" stroke="#1a3a6b" stroke-width="2.5"/>
+    <path d="M 197 68 A 20 20 0 0 1 197 108" fill="none" stroke="#1a3a6b" stroke-width="6"/>
+    <line x1="195" y1="104" x2="212" y2="130" stroke="#1a3a6b" stroke-width="6" stroke-linecap="round"/>
+    <g stroke="#1a3a6b" stroke-width="1" opacity="0.6">
+      <line x1="188" y1="72" x2="193" y2="72"/><line x1="188" y1="92" x2="193" y2="92"/>
+      <line x1="188" y1="122" x2="193" y2="122"/>
+    </g>
+  </g>
+
+  <!-- MINT -->
+  <text x="110" y="188" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="19" font-weight="600" letter-spacing="6" fill="#c62828">MINT</text>
+</svg><div class="logo-klasse">Klasse 6C</div></div>
+  <h1>1️⃣ Teiler</h1>
+  <p>Wann lässt sich etwas gerecht aufteilen? · Stationlernen</p>
+</header>
+<main>
+<section class="glass einheit">
+    
+
+
+  
+    <div class="startwahl">
+      <p>👆 Bevor du startest, wähle:</p>
+      <button class="wahlbtn wbtn-hilfe" onclick="waehle('e')">🙋 Ich benötige Hilfe bei der Bearbeitung der Aufgaben<small>Du erhältst Aufgaben in vereinfachter Form – mit extra Unterstützung und Förder-Zahlenkasten.</small></button>
+      <button class="wahlbtn wbtn-schwer" onclick="waehle('s')">💪 Ich benötige keine Hilfe<small>Du erhältst anspruchsvollere Aufgaben für dich allein.</small></button>
+    </div>
+    <div class="fortschritt" id="fortschritt">
+      <div class="fbar"><div id="ffill"></div></div>
+      <p id="ftext">0 von 6 Stationen geschafft</p>
+    </div>
+    <div id="level-e">
+
+    <div class="einstieg"><b>Problemaufgabe:</b> 6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?
+      <div class="scene"><button class="mc-option" onclick="ez(this,true,'Richtig! 6 : 3 = 2 – ohne Rest.')">A) Ja</button><button class="mc-option" onclick="ez(this,false,'6 : 3 = 2 – es geht ohne Rest!')">B) Nein</button><p class="msg"></p>
+      <div class="begruende"><p>Begründe deine Wahl:</p><button class="mc-option bg-option" onclick="ezBegruende(this,true,'🎯 Antwort und Begründung stimmen!','e')">Weil 6 : 3 = 2 ohne Rest</button><button class="mc-option bg-option" onclick="ezBegruende(this,false,'Klein sein reicht nicht – rechne 6 : 3!','e')">Weil 3 eine kleine Zahl ist</button><button class="mc-option bg-option" onclick="ezBegruende(this,false,'Größer sein reicht nicht – rechne 6 : 3!','e')">Weil 6 größer als 3 ist</button><p class="bfeedback"></p></div>
+      </div></div>
+    <div class="bruecke" id="bruecke-e">🌉 <b>Dein Weg:</b> Beim Verteilen hast du gemerkt: Ohne Rest klappt es nur bei bestimmten Zahlen. Aber woran erkennt man so einen Teiler – muss man immer erst rechnen? Finde es bei <b>Station 1</b> heraus!</div>
+    <h3 class="abschnitt">🧩 Stationen</h3>
+<h3 class="abschnitt">🧩 Stationen</h3>
+
+  <div class="glass aufgabe t1">
+    <h4>Station 1</h4>
+    <p>Welche Zahl ist ein Teiler von 12?</p>
+    <button class="mc-option" onclick="mc(this,false,'Runde 1: 12 : 5 = 2 Rest 2 …')">A) 5</button>
+    <button class="mc-option" onclick="mc(this,true,'Richtig! 12 : 6 = 2 – ohne Rest.')">B) 6</button>
+    <button class="mc-option" onclick="mc(this,false,'Runde 1: 12 : 8 = 1 Rest 4 …')">C) 8</button>
+    <p class="feedback"></p>
+    <div class="begruende"><p>Begründe deine Wahl:</p>
+      <button class="mc-option" onclick="mc2(this,true,'🎯 Antwort und Begründung stimmen!')">Weil 12 : 6 = 2 ohne Rest aufgeht</button>
+      <button class="mc-option" onclick="mc2(this,false,'Fast – aber es geht ums Teilen, nicht um Größe!')">Weil 6 kleiner als 12 ist</button>
+      <button class="mc-option" onclick="mc2(this,false,'Gerade sein reicht nicht – probiere 12 : 8!')">Weil 6 eine gerade Zahl ist</button>
+      <p class="bfeedback"></p>
+    </div>
+  </div>
+
+  <div class="glass aufgabe t2">
+    <h4>Station 2</h4>
+    <p>T₁₀ = {1; 2; 5; 10}. Welche Zahl gehört <b>nicht</b> zu T₁₀?</p>
+    <button class="mc-option" onclick="mc(this,true,'Richtig! 10 : 4 = 2 Rest 2.')">A) 4</button>
+    <button class="mc-option" onclick="mc(this,false,'Runde 2: 10 : 2 = 5 – 2 gehört zu T₁₀!')">B) 2</button>
+    <button class="mc-option" onclick="mc(this,false,'Runde 2: 10 : 10 = 1 – 10 gehört zu T₁₀!')">C) 10</button>
+    <p class="feedback"></p>
+    <div class="begruende"><p>Begründe deine Wahl:</p>
+      <button class="mc-option" onclick="mc2(this,true,'🎯 Antwort und Begründung stimmen!')">Weil 10 : 4 = 2 Rest 2, also bleibt ein Rest</button>
+      <button class="mc-option" onclick="mc2(this,false,'Klein sein ist nicht das Kriterium – rechne 10 : 4!')">Weil 4 kleiner als 10 ist</button>
+      <button class="mc-option" onclick="mc2(this,false,'Gerade sein reicht nicht – rechne 10 : 4!')">Weil 4 eine gerade Zahl ist</button>
+      <p class="bfeedback"></p>
+    </div>
+  </div>
+
+  <div class="glass aufgabe t3">
+    <h4>Station 3</h4>
+    <p>Ist 3 ein Teiler von 15?</p>
+    <button class="mc-option" onclick="mc(this,true,'Richtig! 15 : 3 = 5.')">A) Ja</button>
+    <button class="mc-option" onclick="mc(this,false,'Runde 3: Rechne 15 : 3 … es geht auf!')">B) Nein</button>
+    <p class="feedback"></p>
+    <div class="begruende"><p>Begründe deine Wahl:</p>
+      <button class="mc-option" onclick="mc2(this,true,'🎯 Antwort und Begründung stimmen!')">Weil 3 · 5 = 15</button>
+      <button class="mc-option" onclick="mc2(this,false,'Ungerade sein ist keine Teilbarkeitsregel!')">Weil 3 eine ungerade Zahl ist</button>
+      <button class="mc-option" onclick="mc2(this,false,'Größer sein reicht nicht – 4 ist auch kleiner als 15, aber kein Teiler!')">Weil 3 kleiner als 15 ist</button>
+      <p class="bfeedback"></p>
+    </div>
+  </div>
+
+  <div class="glass aufgabe t4">
+    <h4>Station 4</h4>
+    <p>Ziehe oder tippe die Wörter in die Lücken!</p>
+    <div class="luecke-block" id="lu1">
+      <p style="line-height:2.2;">
+        Die Zahlen 1; 2; 3 und 6 heißen die <span class="gap" id="lu1g0">&nbsp;</span> von 6.
+        Man fasst sie in der Teiler<span class="gap" id="lu1g1">&nbsp;</span> zusammen.
+        Teiler, die zwei Zahlen gemeinsam haben, nennt man <span class="gap" id="lu1g2">&nbsp;</span> Teiler.
+      </p>
+      <div class="pool"><span class="pool-lab">Wortfeld:</span>
+        <span class="chip" id="lu1w0" data-val="teiler"><i>Teiler</i></span>
+        <span class="chip" id="lu1w1" data-val="menge"><i>menge</i></span>
+        <span class="chip" id="lu1w2" data-val="gemeinsame"><i>gemeinsame</i></span>
+        <span class="chip" id="lu1w3" data-val="vielfache">Vielfache</span>
+        <span class="chip" id="lu1w4" data-val="quersumme">Quersumme</span>
+      </div>
+      <button class="btn" onclick="pruefe('lu1')">Prüfen</button>
+      <p class="feedback"></p>
+    </div>
+  </div>
+
+  
+<div class="glass aufgabe foerderbox">
+    <h4>Station 5 · Zahlenkasten</h4>
+    <b>🌱 Zahlenkasten – Einmaleins-Förderung:</b> Tippe eine Zahl an, rechne im Kopf, dann „Lösung“!
+    <div class="zahlenkasten">
+      <button class="ztile" data-n="2">A</button><button class="ztile" data-n="3">B</button>
+      <button class="ztile" data-n="4">C</button><button class="ztile" data-n="5">D</button>
+      <button class="ztile" data-n="6">E</button><button class="ztile" data-n="7">F</button>
+      <button class="ztile" data-n="8">G</button><button class="ztile" data-n="9">H</button>
+    </div>
+    <p class="faufgabe">👉 Tippe ein Feld (A–H) an!</p>
+    <div class="themenaufgabe"><b>📗 Aufgabe zum Thema:</b><p style="margin:.25rem 0 .4rem;">T₁₂ = {1; 2; 3; 4; 6; 12}. Welche Zahl gehört <b>nicht</b> zu T₁₂?</p><div class="scene" style="padding:.4rem 0 0;justify-content:flex-start;"><button class="mc-option" onclick="ez(this,false,'6 ist in T₁₂ enthalten: 12 : 6 = 2!')">A) 6</button><button class="mc-option" onclick="ez(this,false,'12 : 12 = 1 – 12 gehört zu T₁₂!')">B) 12</button><button class="mc-option" onclick="ez(this,true,'Richtig! 12 : 5 = 2 Rest 2 – 5 ist kein Teiler von 12.')">C) 5</button><p class="msg"></p></div></div>
+  </div>
+</div>
+<div id="level-s">
+
+    <div class="einstieg"><b>Problemaufgabe:</b> 26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?
+      <div class="scene"><button class="mc-option" onclick="ez(this,false,'26 : 4 = 6 Rest 2 – 2 Getränke bleiben übrig!')">A) Ja</button><button class="mc-option" onclick="ez(this,true,'Richtig! 26 : 4 = 6 Rest 2 – 4 ist kein Teiler von 26.')">B) Nein</button><p class="msg"></p>
+      <div class="begruende"><p>Begründe deine Wahl:</p><button class="mc-option bg-option" onclick="ezBegruende(this,true,'🎯 Antwort und Begründung stimmen!','s')">Weil 26 : 4 = 6 Rest 2</button><button class="mc-option bg-option" onclick="ezBegruende(this,false,'Gerade Zahlen können ungerade Teiler haben – und umgekehrt!','s')">Weil 4 eine gerade Zahl ist</button><button class="mc-option bg-option" onclick="ezBegruende(this,false,'Größe entscheidet nicht – 26 ist auch größer als 5, und 5 ist kein Teiler!','s')">Weil 26 größer als 4 ist</button><p class="bfeedback"></p></div>
+      </div></div>
+    <div class="bruecke" id="bruecke-s">🌉 <b>Dein Weg:</b> 26 Becher auf 4 Kisten – es blieb ein Rest. Zahlen, die ohne Rest aufteilen, nennt man Teiler. Wie findet man sie auch bei größeren Zahlen sicher? <b>Station 1</b> gibt dir Werkzeuge an die Hand.</div>
+      <h3 class="abschnitt">🧩 Stationen – anspruchsvoll</h3>
+<div class="glass aufgabe t1">
+    <h4>Station 1</h4>
+    <p>Welche Zahl ist gemeinsamer Teiler von 84 und 96?</p>
+    <button class="mc-option" onclick="mc(this,false,'Runde 1: 7 · 12 = 84, aber 96 : 7 = 13 Rest 5 …')">A) 7</button>
+    <button class="mc-option" onclick="mc(this,true,'Richtig! 12 · 7 = 84 und 12 · 8 = 96.')">B) 12</button>
+    <button class="mc-option" onclick="mc(this,false,'Runde 1: 96 : 9 geht nicht auf …')">C) 9</button>
+    <p class="feedback"></p>
+    <div class="begruende"><p>Begründe deine Wahl:</p>
+      <button class="mc-option" onclick="mc2(this,true,'🎯 Antwort und Begründung stimmen!')">Weil 12 · 7 = 84 und 12 · 8 = 96</button>
+      <button class="mc-option" onclick="mc2(this,false,'Gerade Zahlen sind nicht automatisch gemeinsame Teiler – 8 ist auch gerade, aber 84 : 8 geht nicht auf!')">Weil 12 eine gerade Zahl ist</button>
+      <button class="mc-option" onclick="mc2(this,false,'Größe allein reicht nicht – 8 ist auch größer als 7 und kein gemeinsamer Teiler!')">Weil 12 größer als 7 und 9 ist</button>
+      <p class="bfeedback"></p>
+    </div>
+  </div>
+<div class="glass aufgabe t2">
+    <h4>Station 2</h4>
+    <p>T₇₂ = {1; 2; 3; 4; 6; 8; 9; 12; 18; 24; 36; 72}. Welche Zahl gehört <b>nicht</b> zu T₇₂?</p>
+    <button class="mc-option" onclick="mc(this,false,'Runde 2: 72 : 36 = 2 – 36 gehört zu T₇₂!')">A) 36</button>
+    <button class="mc-option" onclick="mc(this,false,'Runde 2: 72 : 24 = 3 – 24 gehört zu T₇₂!')">B) 24</button>
+    <button class="mc-option" onclick="mc(this,true,'Richtig! 72 : 16 = 4 Rest 8.')">C) 16</button>
+    <p class="feedback"></p>
+    <div class="begruende"><p>Begründe deine Wahl:</p>
+      <button class="mc-option" onclick="mc2(this,true,'🎯 Antwort und Begründung stimmen!')">Weil 72 : 16 = 4 Rest 8</button>
+      <button class="mc-option" onclick="mc2(this,false,'Gerade Zahlen können Teiler sein: 36 und 24 sind auch gerade und dabei!')">Weil 16 eine gerade Zahl ist</button>
+      <button class="mc-option" onclick="mc2(this,false,'Klein sein reicht nicht – 16 ist kleiner als 72, aber kein Teiler!')">Weil 16 kleiner als 72 ist</button>
+      <p class="bfeedback"></p>
+    </div>
+  </div>
+<div class="glass aufgabe t3">
+    <h4>Station 3</h4>
+    <p>Ist 13 ein Teiler von 156?</p>
+    <button class="mc-option" onclick="mc(this,true,'Richtig! 13 · 12 = 156.')">A) Ja</button>
+    <button class="mc-option" onclick="mc(this,false,'Runde 3: 13 · 12 = 156 – 13 ist ein Teiler von 156!')">B) Nein</button>
+    <p class="feedback"></p>
+    <div class="begruende"><p>Begründe deine Wahl:</p>
+      <button class="mc-option" onclick="mc2(this,true,'🎯 Antwort und Begründung stimmen!')">Weil 13 · 12 = 156</button>
+      <button class="mc-option" onclick="mc2(this,false,'Gerade Zahlen haben auch ungerade Teiler: 156 = 12 · 13!')">Weil 156 eine gerade Zahl ist</button>
+      <button class="mc-option" onclick="mc2(this,false,'Ob 13 eine Primzahl ist, spielt hier keine Rolle!')">Weil 13 eine Primzahl ist</button>
+      <p class="bfeedback"></p>
+    </div>
+  </div>
+<div class="glass aufgabe t4">
+    <h4>Station 4</h4>
+    <p>Ziehe oder tippe die Wörter in die Lücken!</p>
+    <div class="luecke-block" id="lu1s">
+      <p style="line-height:2.2;">
+        Die Zahlen 1; 2; 4 und 8 heißen die <span class="gap" id="lu1sg0">&nbsp;</span> von 8.
+        Man fasst sie in der Teiler<span class="gap" id="lu1sg1">&nbsp;</span> zusammen.
+        Teiler, die in zwei Teiler<span class="gap" id="lu1sg2">&nbsp;</span> vorkommen,
+        nennt man <span class="gap" id="lu1sg3">&nbsp;</span> Teiler.
+      </p>
+      <div class="pool"><span class="pool-lab">Wortfeld:</span>
+        <span class="chip" id="lu1sw0" data-val="teiler"><i>Teiler</i></span>
+        <span class="chip" id="lu1sw1" data-val="menge"><i>menge</i></span>
+        <span class="chip" id="lu1sw2" data-val="mengen"><i>mengen</i></span>
+        <span class="chip" id="lu1sw3" data-val="gemeinsame"><i>gemeinsame</i></span>
+        <span class="chip" id="lu1sw4" data-val="vielfache">Vielfache</span>
+        <span class="chip" id="lu1sw5" data-val="bruch">Bruch</span>
+      </div>
+      <button class="btn" onclick="pruefe('lu1s')">Prüfen</button>
+      <p class="feedback"></p>
+    </div>
+  </div>
+<div class="glass aufgabe foerderbox schwer">
+    <h4>Station 5 · Zahlenkasten</h4>
+    <b>🔥 Zahlenkasten:</b> Tippe ein Feld an, rechne im Kopf und trage dein Ergebnis ein!
+    <div class="zahlenkasten">
+      <button class="ztile" data-n="6">A</button><button class="ztile" data-n="7">B</button>
+      <button class="ztile" data-n="8">C</button><button class="ztile" data-n="9">D</button>
+      <button class="ztile" data-n="11">E</button><button class="ztile" data-n="12">F</button>
+      <button class="ztile" data-n="13">G</button><button class="ztile" data-n="14">H</button>
+    </div>
+    <p class="faufgabe">👉 Tippe ein Feld (A–H) an!</p>
+    
+  </div>
+</div>
+<div id="level-m" style="display:none">
+<div class="glass aufgabe merke-bau t5" id="st-merke">
+    <h4>Station 6 · Merke-Baukasten</h4>
+    <div class="luecke-block" id="lm1">
+      <p style="line-height:2.2;">
+        Die Teiler einer Zahl fasst man in einer Teiler<span class="gap" id="lm1g0">&nbsp;</span> zusammen.
+        Gleiche Teiler zweier Zahlen heißen <span class="gap" id="lm1g1">&nbsp;</span> Teiler.
+      </p>
+      <div class="pool"><span class="pool-lab">Wortfeld:</span>
+        <span class="chip" id="lm1w0" data-val="menge"><i>menge</i></span>
+        <span class="chip" id="lm1w1" data-val="gemeinsame"><i>gemeinsame</i></span>
+        <span class="chip" id="lm1w2" data-val="echte">echte</span>
+        <span class="chip" id="lm1w3" data-val="unendlich">unendlich</span>
+      </div>
+      <button class="btn" onclick="pruefe('lm1')">Merke prüfen</button>
+      <p class="feedback"></p>
+      <div class="merke-ok"><span class="blink">🎉 <b>Deine Merke ist richtig!</b><br>
+        
+        <b>Aufforderung:</b> Übernimm sie jetzt in dein Unterrichtsheft – schreibe den Text mit deinen Wörtern sauber ab.</span>
+        <p class="merke-titel">1️⃣ Teiler</p>
+        <div class="merke-text"></div>
+        <p class="merke-beispiel"><b>Beispiel:</b> T₁₂ = {1; 2; 3; 4; 6; 12} – gemeinsame Teiler von 12 und 18 sind zum Beispiel 1; 2; 3 und 6.</p>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <div class="check"><b>Was kannst du jetzt?</b> Tippe an, was du sicher kannst!
+    <div class="wkj">
+      <label><input type="checkbox"><span class="box"></span><span class="txt">Ich kann Teiler einer Zahl finden.</span></label>
+      <label><input type="checkbox"><span class="box"></span><span class="txt">Ich kann eine Teilermenge aufschreiben.</span></label>
+      <label><input type="checkbox"><span class="box"></span><span class="txt">Ich kann gemeinsame Teiler finden.</span></label>
+      <div style="text-align:center;"><button class="btn" id="fb-btn" style="display:none;background:var(--orange);font-size:1rem;margin-top:.9rem;" onclick="gibFeedback()">💬 Gib mir ein Feedback</button></div>
+<div class="fb-box" id="fb-box"></div>
+    </div>
+  </div>
+</div>
+</section>
+</main>
+<footer>Harbi_6C · Unterrichtsreihe „Teilbarkeit und Brüche"</footer>
+<script>
+let aktLevel=null;
+let fehlversuche=0;
+function waehle(lv){
+  aktLevel=lv;
+  document.getElementById('level-e').style.display = lv==='e'?'block':'none';
+  document.getElementById('level-s').style.display = lv==='s'?'block':'none';
+  document.getElementById('level-m').style.display='block';
+  document.querySelector('.wbtn-hilfe').classList.toggle('aktiv', lv==='e');
+  document.querySelector('.wbtn-schwer').classList.toggle('aktiv', lv==='s');
+  document.getElementById('fortschritt').style.display='block';
+  const fbb=document.getElementById('fb-btn'); if(fbb) fbb.style.display='inline-block';
+  const _lc=document.getElementById('level-'+lv); if(_lc){_lc.dataset.schritt='0';}
+  schrittUpdate();
+  updateF();
+  document.getElementById('fortschritt').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function updateF(){
+  if(!aktLevel) return;
+  let n=0;
+  const cont=document.getElementById('level-'+aktLevel);
+  if(cont) n += cont.querySelectorAll('.aufgabe.fertig').length;
+  const mk=document.getElementById('st-merke');
+  if(mk && mk.classList.contains('fertig')) n++;
+  document.getElementById('ffill').style.width=(n/5*100)+'%';
+  const _ft=document.getElementById('ftext');
+  if(_ft){ _ft.textContent = engAktiv ? (n>=5 ? '🏆 '+n+' of 6 stations completed – unit complete!' : n+' of 6 stations completed') : (n>=5 ? '🏆 '+n+' von 6 Stationen geschafft – Einheit komplett!' : n+' von 6 Stationen geschafft'); }
+}
+function mc(btn, korrekt, msg){
+  const box = btn.closest('.aufgabe');
+  const fb = box.querySelector('.feedback');
+  if(korrekt){
+    btn.classList.add('richtig');
+    [...box.children].forEach(el=>{ if(el.classList && el.classList.contains('mc-option')) el.disabled=true; });
+    fb.className='feedback ok'; fb.innerHTML='✅ '+msg;
+    const bg = box.querySelector('.begruende');
+    if(bg){ bg.style.display='block'; } else { box.classList.add('fertig'); updateF(); }
+  } else {
+    btn.classList.add('falsch'); btn.disabled=true;
+    fehlversuche++;
+    fb.className='feedback nope'; fb.innerHTML='❌ '+msg+' – versuche es noch einmal!';
+  }
+}
+function ez(btn, korrekt, msg){
+  const sc = btn.closest('.scene');
+  const m = sc.querySelector('.msg');
+  if(korrekt){
+    btn.classList.add('richtig');
+    sc.querySelectorAll('.mc-option:not(.bg-option)').forEach(b=>b.disabled=true);
+    m.className='msg ok'; m.innerHTML='✅ '+msg;
+    const bg = sc.querySelector('.begruende'); if(bg) bg.style.display='block';
+  } else {
+    btn.classList.add('falsch'); btn.disabled=true;
+    fehlversuche++;
+    m.className='msg nope'; m.innerHTML='❌ '+msg;
+  }
+}
+function ezBegruende(btn,korrekt,msg,level){
+  mc2(btn,korrekt,msg);
+  if(korrekt) zeigBruecke(level);
+}
+function mc2(btn, korrekt, msg){
+  const bg = btn.closest('.begruende');
+  const fb = bg.querySelector('.bfeedback');
+  if(korrekt){
+    btn.classList.add('richtig');
+    bg.querySelectorAll('.mc-option').forEach(b=>b.disabled=true);
+    fb.className='bfeedback ok'; fb.innerHTML=msg;
+    const _ag=btn.closest('.aufgabe'); if(_ag){_ag.classList.add('fertig');} updateF();
+  } else {
+    btn.classList.add('falsch'); btn.disabled=true;
+    fehlversuche++;
+    fb.className='bfeedback nope'; fb.innerHTML='❌ '+msg;
+  }
+}
+const LOES = {"lu1": ["teiler", "menge", "gemeinsame"], "lm1": ["menge", "gemeinsame"], "lu2": ["16", "menge", "12"], "lm2": ["menge", "gemeinsames"], "lu3": ["endziffer", "beiden", "3"], "lm3": ["2", "0 oder 5", "0"], "lu4": ["ziffern", "3", "9"], "lm4": ["quersumme", "3", "9"], "lu5": ["zwei", "1", "keine"], "lm5": ["primzahlen", "primfaktoren"], "lu6": ["echte", "unechte", "1 2/3"], "lm6": ["echte", "unechte", "1 2/3"], "lu7": ["erweitern", "kürzen", "gleich"], "lm7": ["gleich", "gleich", "1"], "lu1s": ["teiler", "menge", "mengen", "gemeinsame"], "lu2s": ["36", "mengen", "gemeinsames", "24"], "lu3s": ["beiden", "endziffern", "4"], "lu4s": ["ziffern", "21", "3", "9"], "lu5s": ["zwei", "primzahlen", "primfaktorzerlegung", "5"], "lu6s": ["9/12", "unechte", "gemischte zahl", "1 2/3"], "lu7s": ["zähler", "nenner", "erweitern", "kürzen", "1"]};
+const TEXTE = {"lm1": "Die Teiler einer Zahl fasst man in einer Teiler{menge} zusammen. Gleiche Teiler zweier Zahlen heißen {gemeinsame} Teiler.", "lm2": "Die Vielfachen einer Zahl fasst man in einer Vielfachen{menge} zusammen. Zwei Vielfachenmengen haben immer ein {gemeinsames} Vielfaches.", "lm3": "Durch {2} teilbar: Endziffer 0; 2; 4; 6 oder 8. Durch 5: Endziffer {0 oder 5}. Durch 10: Endziffer {0}.", "lm4": "Addiert man die Ziffern einer Zahl, erhält man die {Quersumme}. Durch 3 teilbar, wenn die Quersumme durch {3} teilbar ist. Durch {9} teilbar, wenn die Quersumme durch 9 teilbar ist.", "lm5": "Zahlen mit genau zwei Teilern heißen {Primzahlen}. Zerlegung in {Primfaktoren}: 6 = 2 · 3.", "lm6": "Links von 1: {echte} Brüche. Rechts von 1: {unechte} Brüche. Als gemischte Zahl: 5/3 = {1 2/3}.", "lm7": "Erweitern (malnehmen): Wert bleibt {gleich}. Kürzen (teilen): Wert bleibt {gleich}. Vollständig gekürzt: außer der {1} kein gemeinsamer Teiler."};
+const norm = s => (s||'').toLowerCase().replace(/\s+/g,' ').trim();
+let dragChip=null, ghost=null;
+document.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('pointerdown', e=>{
+    e.preventDefault(); dragChip = chip;
+    ghost = chip.cloneNode(true); ghost.classList.add('ghost');
+    document.body.appendChild(ghost); moveG(e.clientX, e.clientY);
+    document.addEventListener('pointermove', onMv);
+    document.addEventListener('pointerup', onUp, {once:true});
+  });
+  chip.addEventListener('click', ()=>{
+    if(chip.classList.contains('verwendet')) return;
+    const block = chip.closest('.luecke-block');
+    const leer = [...block.querySelectorAll('.gap')].find(g => !g.dataset.val);
+    if(!leer) return;
+    if(leer.dataset.usedChip){ const a=document.getElementById(leer.dataset.usedChip); if(a) a.classList.remove('verwendet'); }
+    leer.innerHTML = chip.innerHTML; leer.dataset.val = chip.dataset.val;
+    leer.dataset.usedChip = chip.id; leer.classList.remove('ok','bad');
+    chip.classList.add('verwendet');
+  });
+});
+function moveG(x,y){ ghost.style.left=(x+14)+'px'; ghost.style.top=(y-16)+'px'; }
+function onMv(e){ moveG(e.clientX, e.clientY); }
+function onUp(e){
+  document.removeEventListener('pointermove', onMv);
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const gap = el ? el.closest('.gap') : null;
+  if(gap && gap.closest('.luecke-block') === dragChip.closest('.luecke-block')){
+    if(gap.dataset.usedChip){ const a=document.getElementById(gap.dataset.usedChip); if(a) a.classList.remove('verwendet'); }
+    gap.innerHTML = dragChip.innerHTML; gap.dataset.val = dragChip.dataset.val;
+    gap.dataset.usedChip = dragChip.id; gap.classList.remove('ok','bad');
+    dragChip.classList.add('verwendet');
+  }
+  ghost.remove(); ghost=null; dragChip=null;
+}
+document.querySelectorAll('.gap').forEach(g=>{
+  g.addEventListener('click', ()=>{
+    if(g.dataset.usedChip){
+      const c=document.getElementById(g.dataset.usedChip); if(c) c.classList.remove('verwendet');
+      g.dataset.usedChip=''; g.dataset.val=''; g.innerHTML='&nbsp;'; g.classList.remove('ok','bad');
+    }
+  });
+});
+function pruefe(id){
+  const loes = LOES[id];
+  const block = document.getElementById(id);
+  const fb = block.querySelector('.feedback');
+  let alleOk=true, leer=false;
+  loes.forEach((l,i)=>{
+    const gap=document.getElementById(id+'g'+i);
+    const val=norm(gap.dataset.val);
+    if(!val){ gap.classList.add('bad'); gap.classList.remove('ok'); alleOk=false; leer=true; }
+    else if(val===norm(l)){ gap.classList.add('ok'); gap.classList.remove('bad'); }
+    else { gap.classList.add('bad'); gap.classList.remove('ok'); alleOk=false; }
+  });
+  if(alleOk){
+    fb.className='feedback ok'; fb.innerHTML='🎉 Alles richtig!';
+    const aufgabe = block.closest('.aufgabe');
+    if(aufgabe){ aufgabe.classList.add('fertig'); updateF(); }
+    const okBox=block.querySelector('.merke-ok');
+    if(okBox){
+      let t=TEXTE[id];
+      loes.forEach((l,i)=>{ t=t.replaceAll('{'+i+'}', l).replaceAll('{'+l+'}', l); });
+      block.querySelector('.merke-text').textContent=t;
+      okBox.style.display='block';
+      okBox.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  } else {
+    fehlversuche++;
+    fb.className='feedback nope';
+    fb.innerHTML = leer ? '❌ Es sind noch Lücken leer!' : '❌ Nicht ganz richtig – korrigiere die rot markierten Lücken!';
+  }
+}
+(function(){
+  let ri=0; const z=[0,0,0];
+  for(let i=0;i<6;i++){
+    const f=document.getElementById('sz1f'+i);
+    if(!f) return;
+    f.addEventListener('click', function(){
+      if(this.dataset.weg) return;
+      this.dataset.weg='1';
+      document.getElementById('sz1k'+ri).appendChild(this);
+      z[ri]++; ri=(ri+1)%3;
+    });
+  }
+  window.sz1pruefen=function(){
+    const m=document.getElementById('sz1msg');
+    if(z[0]+z[1]+z[2]<6){ m.className='msg nope'; m.textContent='Verteile erst alle 6 Trinkpäckchen!'; }
+    else if(z[0]===2&&z[1]===2&&z[2]===2){ m.className='msg ok'; m.textContent='✅ Jede Kiste hat 2 Trinkpäckchen: 6 : 3 = 2 – ohne Rest! 3 ist ein Teiler von 6.';
+    zeigBruecke('e'); }
+    else { m.className='msg nope'; m.textContent='Noch nicht gleich verteilt – tippe weiter!';
+    zeigBruecke('e'); }
+  };
+})();
+(function(){
+  const str=document.getElementById('sz2strahl');
+  if(!str) return;
+  for(let i=0;i<=30;i++){
+    const d=document.createElement('div');
+    d.className='st'+(i%5===0?' s5':''); d.id='sz2s'+i; d.textContent=(i%5===0)?i:'';
+    str.appendChild(d);
+  }
+  let s=0,k=0;
+  window.sz2sprung=function(n,w){
+    if(w==='s') s=Math.min(30,s+n); else k=Math.min(30,k+n);
+    document.querySelectorAll('.st.hier').forEach(e=>e.classList.remove('hier'));
+    document.getElementById('sz2s'+s).classList.add(w==='s'?'vs':'vk','hier');
+    document.getElementById('sz2s'+k).classList.add(w==='s'?'vk':'vs','hier');
+    const m=document.getElementById('sz2msg');
+    m.className='msg'; m.textContent='Silke: '+s+' · Kyeremaa: '+k;
+    if(s===k && s>0){
+      document.getElementById('sz2s'+s).classList.add('vs','vk');
+      m.className='msg ok'; m.textContent='🎉 Sie treffen sich bei '+s+'! (gemeinsames Vielfaches)';
+      zeigBruecke('e');
+    }
+  };
+})();
+(function(){
+  let ok=0;
+  document.querySelectorAll('#sz3 .ballon').forEach(b=>{
+    b.addEventListener('click', function(){
+      const n=+b.dataset.n;
+      const qs=(''+n).split('').reduce((a,c)=>a+ +c,0);
+      const m=document.getElementById('sz3msg');
+      if(qs%9===0){ if(!b.dataset.weg){ b.dataset.weg='1'; b.classList.add('weg'); ok++;
+        m.className='msg ok'; m.textContent='✅ '+n+' steigt auf! (Quersumme '+qs+' : 9 = '+(qs/9)+') Gestartet: '+ok+' von 3';
+        if(ok===3){zeigBruecke('e');} } }
+      else { b.classList.add('schuetteln'); m.className='msg nope';
+        m.textContent=n+'? Quersumme = '+qs+' – 9 passt nicht. Such weiter!';
+        setTimeout(()=>b.classList.remove('schuetteln'),400); }
+    });
+  });
+})();
+(function(){
+  let cnt=0;
+  ['7','8','6'].forEach((z,i)=>{
+    const el=document.getElementById('sz4z'+i);
+    if(!el) return;
+    el.addEventListener('click', function(){
+      if(this.dataset.weg) return;
+      this.dataset.weg='1'; cnt++;
+      this.classList.add('weg');
+      document.getElementById('sz4box').textContent=('7+8+6').split('+').slice(0,cnt).join('+');
+      const m=document.getElementById('sz4msg');
+      if(cnt===3){ document.getElementById('sz4box').textContent='7+8+6=21';
+        m.className='msg ok'; m.textContent='✅ Quersumme = 21. 21 ist durch 3 teilbar – also ist 786 durch 3 teilbar!';
+        zeigBruecke('e'); }
+    });
+  });
+})();
+window.sz5leg=function(n){
+  zeigBruecke('e');
+  const g=document.getElementById('sz5grid'), m=document.getElementById('sz5msg');
+  if(!g) return;
+  if(n===11){ g.innerHTML='🐑🐑🐑🐑🐑🐑🐑🐑🐑🐑🐑';
+    m.className='msg ok'; m.textContent='✅ 11 Schafe: nur 1 · 11 – genau EINE Möglichkeit! 11 ist besonders … eine Primzahl!'; return; }
+  const reihen = n===2 ? ['🐑🐑🐑🐑🐑🐑','🐑🐑🐑🐑🐑🐑'] : ['🐑🐑🐑🐑','🐑🐑🐑🐑','🐑🐑🐑🐑'];
+  g.innerHTML=reihen.join('<br>');
+  m.className='msg ok';
+  m.textContent=(n===2)?'✅ 12 = 2 · 6 – eine von vielen Möglichkeiten! (auch 3 · 4)':'✅ 12 = 3 · 4 – noch eine Möglichkeit! Für 11 gäbe es nur 1 · 11 …';
+};
+(function(){
+  const karten=document.querySelectorAll('.karte.k6');
+  if(!karten.length) return;
+  let sel=null, fertig=0;
+  karten.forEach(k=>{
+    k.addEventListener('click', ()=>{ karten.forEach(x=>x.classList.remove('sel')); k.classList.add('sel'); sel=k; });
+  });
+  document.querySelectorAll('.slot.sl6').forEach(sl=>{
+    sl.addEventListener('click', ()=>{
+      const m=document.getElementById('sz6msg');
+      if(!sel){ m.className='msg nope'; m.textContent='Tippe erst eine Bruch-Karte an!'; return; }
+      if(+sl.dataset.i === +sel.dataset.i){
+        sl.innerHTML=sel.innerHTML; sl.classList.add('rich');
+        sel.remove(); sel=null; fertig++;
+        m.className='msg ok'; m.textContent='✅ Richtig platziert! ('+fertig+' von 3)';
+        if(fertig===3){ m.textContent='🎉 Alle Brüche liegen richtig! <span class="fr"><span>1</span><span>4</span></span> = <span class="fr"><span>2</span><span>8</span></span> und <span class="fr"><span>1</span><span>2</span></span> = <span class="fr"><span>4</span><span>8</span></span>.';  zeigBruecke('e'); }
+      } else {
+        sl.classList.add('schuetteln');
+        m.className='msg nope'; m.textContent='Hier passt der Bruch nicht – überlege: <span class="fr"><span>1</span><span>4</span></span> = <span class="fr"><span>2</span><span>8</span></span>, <span class="fr"><span>1</span><span>2</span></span> = <span class="fr"><span>4</span><span>8</span></span>!';
+        setTimeout(()=>sl.classList.remove('schuetteln'),400);
+      }
+    });
+  });
+})();
+(function(){
+  const b=document.getElementById('sz7balken');
+  if(!b) return;
+  for(let i=0;i<16;i++){ const d=document.createElement('div'); if(i<12) d.className='voll'; b.appendChild(d); }
+  const stufen=['<span class="fr"><span>3</span><span>4</span></span>','<span class="fr"><span>6</span><span>8</span></span>','<span class="fr"><span>12</span><span>16</span></span>'];
+  let f=0;
+  window.sz7falten=function(){
+    f=Math.min(2,f+1);
+    const m=document.getElementById('sz7msg');
+    m.className='msg ok'; m.innerHTML=stufen[f];
+    if(f===2){ m.innerHTML+=' &nbsp;🎉 Der Wert bleibt gleich – nur die Teile werden feiner! Das ist <b>Erweitern</b>.'; zeigBruecke('e'); }
+  };
+})();
+document.querySelectorAll('.foerderbox').forEach((box,bi)=>{
+  const out = box.querySelector('.faufgabe');
+  const schwer = box.classList.contains('schwer');
+  const buch=['A','B','C','D','E','F','G','H'];
+  box.querySelectorAll('.ztile').forEach((tile,ti)=>{
+    tile.addEventListener('click', ()=>{
+      if(tile.disabled) return;
+      const n=+tile.dataset.n;
+      const r = schwer ? 6+Math.floor(Math.random()*7) : 2+Math.floor(Math.random()*8);
+      out.innerHTML = '🤔 Feld '+buch[ti]+': '+n+' \u00b7 '+r+' = <input class="zantwort" id="za'+bi+'_'+ti+'" inputmode="numeric" autocomplete="off"> <button class="btn2" style="margin:0;" onclick="zcheck('+bi+','+ti+','+n+','+r+')">Pr\u00fcfen</button><p class="zfb" id="zfb'+bi+'_'+ti+'"></p>';
+      setTimeout(function(){const e=document.getElementById('za'+bi+'_'+ti); if(e) e.focus();},80);
+    });
+  });
+});
+function zcheck(bi,ti,n,r){
+  const box=document.querySelectorAll('.foerderbox')[bi];
+  const tile=box.querySelectorAll('.ztile')[ti];
+  const inp=document.getElementById('za'+bi+'_'+ti);
+  const fb=document.getElementById('zfb'+bi+'_'+ti);
+  const v=parseInt(inp.value,10);
+  inp.disabled=true;
+  tile.disabled=true;
+  const alleT=box.querySelectorAll('.ztile').length;
+  if(box.querySelectorAll('.ztile:disabled').length===alleT){
+    const ag=box.closest('.aufgabe');
+    if(ag && !ag.classList.contains('fertig')){ag.classList.add('fertig'); updateF();}
+  }
+  if(v===n*r){
+    inp.classList.add('zok');
+    tile.classList.add('zok-tile');
+    fb.style.color='var(--gruen)';
+    fb.textContent='\u2705 Richtig! '+n+' \u00b7 '+r+' = '+(n*r)+' \u2013 starke Leistung!';
+  } else {
+    fehlversuche++;
+    inp.classList.add('zbad');
+    tile.classList.add('zbad-tile');
+    fb.style.color='var(--rot)';
+    fb.textContent='\u274c Leider falsch. Richtig w\u00e4re: '+n+' \u00b7 '+r+' = '+(n*r);
+  }
+}
+
+
+// Feedback auf Grundlage der bearbeiteten Aufgaben (nicht der Selbsteinschätzung)
+function feedbackText(){
+  const lv=aktLevel||'e';
+  const cont=document.getElementById('level-'+lv);
+  if(!cont) return '';
+  const allH=[...cont.querySelectorAll('.aufgabe h4')].map(h=>h.textContent.trim());
+  const mk=document.getElementById('st-merke');
+  const mkH=mk?mk.querySelector('h4').textContent.trim():'Station 6';
+  const doneH=[...cont.querySelectorAll('.aufgabe.fertig h4')].map(h=>h.textContent.trim());
+  const mkDone=mk && mk.classList.contains('fertig');
+  const ges=allH.length+1;
+  if(mkDone) doneH.push(mkH);
+  const alle=[...allH, mkH];
+  const fehlen=alle.filter(x=>!doneH.includes(x));
+  const fv=fehlversuche;
+  if(fehlen.length===0){
+    if(engAktiv){
+      if(fv===0) return '<p><b>💬 Your feedback</b></p><p class="fb-stark">🏆 Perfect! You completed all '+ges+' stations – without a single wrong attempt. You have truly mastered this topic!</p>';
+      if(fv<=3) return '<p><b>💬 Your feedback</b></p><p class="fb-stark">🏆 Impressive! All '+ges+' stations completed – with only '+fv+' wrong attempt'+(fv===1?'':'s')+'. You are ready for the next challenge!</p>';
+      if(fv<=8) return '<p><b>💬 Your feedback</b></p><p style="color:#111;font-weight:800;">👍 Well done: all '+ges+' stations completed.</p><p class="fb-ziel">📊 <b>How to improve:</b> With '+fv+' wrong attempts it did not go smoothly yet – read the tasks more slowly and check your taps. Practice makes perfect!</p>';
+      return '<p><b>💬 Your feedback</b></p><p style="color:#111;font-weight:800;">✔️ You worked through all '+ges+' stations.</p><p class="fb-ziel">📊 <b>How to improve:</b> With '+fv+' wrong attempts the topic is not secure yet – read more slowly and repeat single stations with the help level. You can do it!</p>';
+    }
+    if(fv===0) return '<p><b>💬 Dein Feedback</b></p><p class="fb-stark">🏆 Perfekt! Du hast alle '+ges+' Stationen geschafft – ohne einen einzigen Fehlversuch. Du beherrschst dieses Thema sicher!</p>';
+    if(fv<=3) return '<p><b>💬 Dein Feedback</b></p><p class="fb-stark">🏆 Beeindruckend! Alle '+ges+' Stationen geschafft – und das mit nur '+fv+' Fehlversuch'+(fv===1?'':'en')+'. Du bist bereit für die nächste Herausforderung!</p>';
+    if(fv<=8) return '<p><b>💬 Dein Feedback</b></p><p style="color:#111;font-weight:800;">👍 Gut gemacht: Alle '+ges+' Stationen geschafft.</p><p class="fb-ziel">📊 <b>So verbesserst du dich:</b> Mit '+fv+' Fehlversuchen lief es noch nicht ganz rund – lies die Aufgaben etwas langsamer und prüfe deine Klicks. Übung macht den Meister!</p>';
+    return '<p><b>💬 Dein Feedback</b></p><p style="color:#111;font-weight:800;">✔️ Du hast alle '+ges+' Stationen durchlaufen.</p><p class="fb-ziel">📊 <b>So verbesserst du dich:</b> Mit '+fv+' Fehlversuchen sitzt das Thema noch nicht sicher – lies langsamer und wiederhole einzelne Stationen im Hilfe-Level. Du schaffst das!</p>';
+  }
+  if(engAktiv){
+    if(doneH.length===0) return '<p><b>💬 Your feedback</b></p><p class="fb-ehrlich">🌱 You have not finished a station yet – but everyone starts somewhere! Work through the stations at your own pace, use the help level if you like. You can do it!</p>';
+    return '<p><b>💬 Your feedback</b></p><p class="fb-stark">💪 <b>Your strengths (Stärken):</b><br>'+doneH.map(x=>'✅ '+x).join('<br>')+'</p><p class="fb-ziel">📈 <b>Practice goals (Übungsziele):</b><br>'+fehlen.map(x=>'🔸 '+x).join('<br>')+'</p>';
+  }
+  if(doneH.length===0) return '<p><b>💬 Dein Feedback</b></p><p class="fb-ehrlich">🌱 Du hast noch keine Station abgeschlossen – aber jede:r fängt mal an! Arbeite die Stationen in deinem Tempo durch, gern mit dem Hilfe-Level und dem Zahlenkasten. Du schaffst das!</p>';
+  return '<p><b>💬 Dein Feedback</b></p><p class="fb-stark">💪 <b>Deine Stärken:</b><br>'+doneH.map(x=>'✅ '+x).join('<br>')+'</p><p class="fb-ziel">📈 <b>Deine Übungsziele:</b><br>'+fehlen.map(x=>'🔸 '+x).join('<br>')+'</p>';
+}
+function fehlversuchText(){
+  const fv=fehlversuche;
+  if(engAktiv){
+    if(fv===0) return '<p class="fb-fehler fb-stark">\ud83c\udfaf Flawless \u2013 not a single wrong attempt!</p>';
+    if(fv<=3) return '<p class="fb-fehler fb-stark">\ud83d\udcaa Very strong \u2013 only '+fv+' wrong attempt'+(fv===1?'':'s')+'.</p>';
+    if(fv<=8) return '<p class="fb-fehler fb-ehrlich">\ud83d\udcca Solid \u2013 '+fv+' wrong attempts. A little more care will make it perfect.</p>';
+    return '<p class="fb-fehler fb-ziel">\ud83d\udcca '+fv+' wrong attempts \u2013 read the tasks a little more slowly. Practice makes perfect!</p>';
+  }
+  if(fv===0) return '<p class="fb-fehler fb-stark">\ud83c\udfaf Perfekt \u2013 ohne einen einzigen Fehlversuch!</p>';
+  if(fv<=3) return '<p class="fb-fehler fb-stark">\ud83d\udcaa Sehr stark \u2013 nur '+fv+' Fehlversuch'+(fv===1?'':'e')+'.</p>';
+  if(fv<=8) return '<p class="fb-fehler fb-ehrlich">\ud83d\udcca Solide \u2013 '+fv+' Fehlversuche. Ein bisschen mehr Sorgfalt macht es perfekt.</p>';
+  return '<p class="fb-fehler fb-ziel">\ud83d\udcca '+fv+' Fehlversuche \u2013 lies die Aufgaben etwas langsamer. \u00dcbung macht den Meister!</p>';
+}
+let fbTimer=null;
+let fbStation=0;
+function stationItems(){
+  const lv=aktLevel||'e';
+  const cont=document.getElementById('level-'+lv);
+  const items=[];
+  if(cont){
+    [...cont.querySelectorAll('.aufgabe h4')].forEach((h,i)=>{
+      items.push({n:i+1, done:h.closest('.aufgabe').classList.contains('fertig')});
+    });
+  }
+  const mk=document.getElementById('st-merke');
+  if(mk) items.push({n:items.length+1, done:mk.classList.contains('fertig')});
+  return items;
+}
+function zeigeStation(i){
+  const items=stationItems();
+  if(!items.length) return;
+  fbStation=((i%items.length)+items.length)%items.length;
+  const it=items[fbStation];
+  const prev=items[(fbStation-1+items.length)%items.length];
+  const next=items[(fbStation+1)%items.length];
+  const de=!engAktiv;
+  const ak=document.getElementById('fbk-aktuell');
+  const pv=document.getElementById('fbk-prev');
+  const nx=document.getElementById('fbk-next');
+  if(ak) ak.innerHTML='🎯 '+(de?'Station Nr. ':'Station no. ')+it.n+' — '+(it.done?'✅ '+(de?'geschafft':'completed'):'🔸 '+(de?'noch offen':'still open'));
+  if(pv) pv.textContent='◀ '+(de?'Station Nr. ':'Station ')+prev.n;
+  if(nx) nx.textContent=(de?'Station Nr. ':'Station ')+next.n+' ▶';
+}
+function gibFeedback(){
+  const box=document.getElementById('fb-box');
+  const lv=aktLevel||'e';
+  const cont=document.getElementById('level-'+lv);
+  const allH=cont?[...cont.querySelectorAll('.aufgabe h4')].length:4;
+  const doneN=cont?[...cont.querySelectorAll('.aufgabe.fertig h4')].length:0;
+  const mk=document.getElementById('st-merke');
+  const ges=allH+1;
+  const fertig=doneN+((mk&&mk.classList.contains('fertig'))?1:0);
+  if(fertig<ges){
+    const offen=stationItems().filter(x=>!x.done).map(x=>(engAktiv?'Station no. ':'Station Nr. ')+x.n);
+    box.innerHTML='<p class="fb-hinweis">'+(engAktiv
+      ? '⏳ Complete all stations first! Still missing: <b style=\'color:#8b0000\'>'+offen.join(', ')+'</b>. Then you will get your feedback.'
+      : '⏳ Bearbeite zuerst alle Stationen! Dir fehlen noch: <b style=\'color:#8b0000\'>'+offen.join(', ')+'</b> – dann bekommst du dein Feedback.')+'</p>';
+    box.style.display='block';
+    box.scrollIntoView({behavior:'smooth',block:'center'});
+    if(fbTimer) clearTimeout(fbTimer);
+    fbTimer=setTimeout(function(){box.style.display='none';},5000);
+    return;
+  }
+  if(fbTimer) clearTimeout(fbTimer);
+  const kar='<div class="fb-karussell"><button class="btn2" id="fbk-prev" onclick="zeigeStation(fbStation-1)"></button><span id="fbk-aktuell"></span><button class="btn2" id="fbk-next" onclick="zeigeStation(fbStation+1)"></button></div>';
+  box.innerHTML=feedbackText()+kar;
+  zeigeStation(fbStation||0);
+  box.style.display='block';
+  if(engAktiv) uebersetzeDom();
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+
+// ===== Sprachtoggle Deutsch/English =====
+let engAktiv=false;
+const uebersetzt=[];
+const MAP={"6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?": "6 drinks are to be shared fairly among 3 people. Does it work without a remainder?", "26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?": "26 drinks are to be shared fairly among 4 people. Does it work without a remainder?", "Weil 6 : 3 = 2 ohne Rest": "Because 6 : 3 = 2 with no remainder", "Weil 3 eine kleine Zahl ist": "Because 3 is a small number", "Weil 6 größer als 3 ist": "Because 6 is greater than 3", "Weil 26 : 4 = 6 Rest 2": "Because 26 : 4 = 6 remainder 2", "Weil 4 eine gerade Zahl ist": "Because 4 is an even number", "Weil 26 größer als 4 ist": "Because 26 is greater than 4","👆 Bevor du startest, wähle:": "👆 Before you start, choose:", "🙋 Ich benötige Hilfe bei der Bearbeitung der Aufgaben": "🙋 I need help working on the tasks", "Du erhältst Aufgaben in vereinfachter Form – mit extra Unterstützung und Förder-Zahlenkasten.": "You get simplified tasks – with extra support and a practice number box.", "💪 Ich benötige keine Hilfe": "💪 I don't need help", "Du erhältst anspruchsvollere Aufgaben für dich allein.": "You get more challenging tasks.", "0 von 6 Stationen geschafft": "0 of 6 stations completed", "Station 6 · Merke-Baukasten": "Station 6 · Build the rule box (Merke)", "Dein Weg:": "Your path:", "Deine Merke ist richtig!": "Your rule (Merke) is correct!", "Aufforderung:": "Your task:", "Übernimm sie jetzt in dein Unterrichtsheft – schreibe den Text mit deinen Wörtern sauber ab.": "Copy it into your exercise book now – write the text neatly in your own words.", "Übernimm sie jetzt in dein Unterrichtsheft – schreibe den Text mit deinen Wörtern sauber ab und ergänze ein Beispiel.": "Copy it into your exercise book now – write the text neatly in your own words and add an example.", "Übernimm sie jetzt in dein Unterrichtsheft – schreibe den Text mit deinen Wörtern sauber ab und ergänze je ein Beispiel.": "Copy it into your exercise book now – write the text neatly in your own words and add an example for each.", "Übernimm sie jetzt in dein Unterrichtsheft – schreibe den Text mit deinen Wörtern sauber ab und prüfe die Zahl 354 in einer Tabelle.": "Copy it into your exercise book now – write the text neatly in your own words and check the number 354 in a table.", "Übernimm sie jetzt in dein Unterrichtsheft – schreibe den Text mit deinen Wörtern sauber ab und ergänze die Zerlegung von 12.": "Copy it into your exercise book now – write the text neatly in your own words and add the factorisation of 12.", "Übernimm sie jetzt in dein Unterrichtsheft – schreibe den Text mit deinen Wörtern sauber ab und zeichne einen Zahlenstrahl mit Achtel-Einteilung.": "Copy it into your exercise book now – write the text neatly in your own words and draw a number line divided into eighths.", "Übernimm sie jetzt in dein Unterrichtsheft – schreibe den Text mit deinen Wörtern sauber ab und ergänze": "Copy it into your exercise book now – write the text neatly in your own words and add", "Beispiel:": "Example:", "Problemaufgabe:": "Problem task:", "Begründe deine Wahl:": "Justify your choice:", "Prüfen": "Check", "Merke prüfen": "Check rule", "Wortfeld:": "Word bank:", "Ziehe oder tippe die Wörter in die Lücken!": "Drag or tap the words into the gaps!", "🌱 Zahlenkasten – Einmaleins-Förderung:": "🌱 Number box – times-tables support:", "🔥 Zahlenkasten:": "🔥 Number box:", "Tippe eine Zahl an, rechne im Kopf, dann „Lösung“!": "Tap a number, work it out in your head, then tap “Solution”!", "Tippe ein Feld an, rechne im Kopf und trage dein Ergebnis ein!": "Tap a field, work it out in your head and enter your result!", "👉 Tippe ein Feld (A–H) an!": "👉 Tap a field (A–H)!", "📗 Aufgabe zum Thema:": "📗 Task on the topic:", "Was kannst du jetzt?": "What can you do now?", "Tippe an, was du sicher kannst!": "Tap what you can do for sure!", "💬 Gib mir ein Feedback": "💬 Give me feedback", "Klasse 6C": "Class 6C", "Harbi_6C · Unterrichtsreihe „Teilbarkeit und Brüche\"": "Harbi_6C · Unit “Divisibility and Fractions”", "– Stationlernen": "– Station learning", "🧩 Stationen": "🧩 Stations", "🧩 Stationen – anspruchsvoll": "🧩 Stations – advanced", "A) Ja": "A) Yes", "B) Nein": "B) No", "1️⃣ Teiler": "1️⃣ Divisors (Teiler)", "Wann lässt sich etwas gerecht aufteilen?": "When can something be shared fairly?", "Tippe die 6 Trinkpäckchen an – jedes springt in eine der 3 Kisten. Geht die Verteilung ohne Rest?": "Tap the 6 juice pouches – each jumps into one of the 3 boxes. Can they be shared without a remainder?", "Tippe die 26 Trinkpäckchen an – jedes springt in eine der 4 Kisten. Geht die Verteilung ohne Rest?": "Tap the 26 juice pouches – each jumps into one of the 4 boxes. Can they be shared without a remainder?", "Verteilung prüfen": "Check the distribution", "Beim Verteilen hast du gemerkt: Ohne Rest klappt es nur bei bestimmten Zahlen. Aber woran erkennt man so einen Teiler – muss man immer erst rechnen? Finde es bei": "While sharing you noticed: it only works without a remainder for certain numbers. But how do you recognise such a divisor (Teiler) – do you always have to calculate? Find out at", "heraus!": "!", "26 Becher auf 4 Kisten – es blieb ein Rest. Zahlen, die ohne Rest aufteilen, nennt man Teiler. Wie findet man sie auch bei größeren Zahlen sicher?": "26 pouches into 4 boxes – a remainder was left. Numbers that share without a remainder are called divisors (Teiler). How do you find them safely, even for larger numbers?", "gibt dir Werkzeuge an die Hand.": "gives you the tools.", "Welche Zahl ist ein Teiler von 12?": "Which number is a divisor (Teiler) of 12?", "Welche Zahl ist gemeinsamer Teiler von 84 und 96?": "Which number is a common divisor of 84 and 96?", "T₁₀ = {1; 2; 5; 10}. Welche Zahl gehört": "T₁₀ = {1; 2; 5; 10}. Which number does", "T₁₂ = {1; 2; 3; 4; 6; 12}. Welche Zahl gehört": "T₁₂ = {1; 2; 3; 4; 6; 12}. Which number does", "T₇₂ = {1; 2; 3; 4; 6; 8; 9; 12; 18; 24; 36; 72}. Welche Zahl gehört": "T₇₂ = {1; 2; 3; 4; 6; 8; 9; 12; 18; 24; 36; 72}. Which number does", "nicht": "not", "zu T₁₀?": "not belong to T₁₀?", "zu T₁₂?": "not belong to T₁₂?", "zu T₇₂?": "not belong to T₇₂?", "Ist 3 ein Teiler von 15?": "Is 3 a divisor (Teiler) of 15?", "Ist 13 ein Teiler von 156?": "Is 13 a divisor (Teiler) of 156?", "Weil 12 : 6 = 2 ohne Rest aufgeht": "Because 12 : 6 = 2 with no remainder", "Weil 12 eine gerade Zahl ist": "Because 12 is an even number", "Weil 6 eine gerade Zahl ist": "Because 6 is an even number", "Weil 6 kleiner als 12 ist": "Because 6 is smaller than 12", "Weil 12 · 7 = 84 und 12 · 8 = 96": "Because 12 · 7 = 84 and 12 · 8 = 96", "Weil 12 größer als 7 und 9 ist": "Because 12 is greater than 7 and 9", "Weil 72 : 16 = 4 Rest 8": "Because 72 : 16 = 4 remainder 8", "Weil 16 eine gerade Zahl ist": "Because 16 is an even number", "Weil 16 kleiner als 72 ist": "Because 16 is smaller than 72", "Weil 13 · 12 = 156": "Because 13 · 12 = 156", "Weil 156 eine gerade Zahl ist": "Because 156 is an even number", "Weil 13 eine Primzahl ist": "Because 13 is a prime number", "Weil 3 · 5 = 15": "Because 3 · 5 = 15", "Weil 3 eine ungerade Zahl ist": "Because 3 is an odd number", "Weil 3 kleiner als 15 ist": "Because 3 is smaller than 15", "Weil 10 : 4 = 2 Rest 2, also bleibt ein Rest": "Because 10 : 4 = 2 remainder 2, so a remainder is left", "Weil 4 eine gerade Zahl ist": "Because 4 is an even number", "Weil 4 kleiner als 10 ist": "Because 4 is smaller than 10", "Die Zahlen 1; 2; 3 und 6 heißen die": "The numbers 1; 2; 3 and 6 are called the", "Die Zahlen 1; 2; 4 und 8 heißen die": "The numbers 1; 2; 4 and 8 are called the", "von 6. Man fasst sie in der Teiler": "of 6. They are collected in the divisor", "von 8. Man fasst sie in der Teiler": "of 8. They are collected in the divisor", "zusammen. Gleiche Teiler zweier Zahlen heißen": "set. The same divisors of two numbers are called", "zusammen. Teiler, die in zwei Teiler": "set. Divisors that appear in two divisor", "zusammen. Teiler, die zwei Zahlen gemeinsam haben, nennt man": "set. Divisors that two numbers share are called", "vorkommen, nennt man": "sets are called", "Die Teiler einer Zahl fasst man in einer Teiler": "The divisors of a number are collected in a divisor", "Teiler": "divisors (Teiler)", "Teiler.": "divisors (Teiler).", "menge": "set (Menge)", "mengen": "sets (Mengen)", "gemeinsame": "common (gemeinsame)", "Vielfache": "multiples (Vielfache)", "Quersumme": "digit sum (Quersumme)", "echte": "proper (echte)", "unendlich": "infinitely many", "Bruch": "fraction (Bruch)", "A) 36": "A) 36", "A) 4": "A) 4", "A) 5": "A) 5", "A) 6": "A) 6", "A) 7": "A) 7", "B) 12": "B) 12", "B) 2": "B) 2", "B) 24": "B) 24", "B) 6": "B) 6", "C) 10": "C) 10", "C) 16": "C) 16", "C) 5": "C) 5", "C) 8": "C) 8", "C) 9": "C) 9", "Ich kann Teiler einer Zahl finden.": "I can find the divisors (Teiler) of a number.", "Ich kann eine Teilermenge aufschreiben.": "I can write down a set of divisors (Teilermenge).", "Ich kann gemeinsame Teiler finden.": "I can find common divisors (gemeinsame Teiler).", "T₁₂ = {1; 2; 3; 4; 6; 12} – gemeinsame Teiler von 12 und 18 sind zum Beispiel 1; 2; 3 und 6.": "T₁₂ = {1; 2; 3; 4; 6; 12} – common divisors of 12 and 18 are, for example, 1; 2; 3 and 6.", "T₃₀ = {1; 2; 3; 5; 6; 10; 15; 30}. Welche Zahl gehört": "T₃₀ = {1; 2; 3; 5; 6; 10; 15; 30}. Which number does","66 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?Getränke6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?sollen6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?gerecht6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?auf6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?36 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?Personen6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?verteilt6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?werden.6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?Geht6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?das6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?ohne6 Getränke sollen gerecht auf 3 Personen verteilt werden. Geht das ohne Rest?Rest?": "6 drinks are to be shared fairly among 3 people. Does it work without a remainder?", "2626 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?Getränke26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?sollen26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?gerecht26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?auf26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?426 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?Personen26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?verteilt26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?werden.26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?Geht26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?das26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?ohne26 Getränke sollen gerecht auf 4 Personen verteilt werden. Geht das ohne Rest?Rest?": "26 drinks are to be shared fairly among 4 people. Does it work without a remainder?", "WeilWeil 6 : 3 = 2 ohne Rest6Weil 6 : 3 = 2 ohne Rest:Weil 6 : 3 = 2 ohne Rest3Weil 6 : 3 = 2 ohne Rest=Weil 6 : 3 = 2 ohne Rest2Weil 6 : 3 = 2 ohne RestohneWeil 6 : 3 = 2 ohne RestRest": "Because 6 : 3 = 2 with no remainder", "WeilWeil 3 eine kleine Zahl ist3Weil 3 eine kleine Zahl isteineWeil 3 eine kleine Zahl istkleineWeil 3 eine kleine Zahl istZahlWeil 3 eine kleine Zahl istist": "Because 3 is a small number", "WeilWeil 6 größer als 3 ist6Weil 6 größer als 3 istgrößerWeil 6 größer als 3 istalsWeil 6 größer als 3 ist3Weil 6 größer als 3 istist": "Because 6 is greater than 3", "WeilWeil 26 : 4 = 6 Rest 226Weil 26 : 4 = 6 Rest 2:Weil 26 : 4 = 6 Rest 24Weil 26 : 4 = 6 Rest 2=Weil 26 : 4 = 6 Rest 26Weil 26 : 4 = 6 Rest 2RestWeil 26 : 4 = 6 Rest 22": "Because 26 : 4 = 6 remainder 2", "WeilWeil 4 eine gerade Zahl ist4Weil 4 eine gerade Zahl isteineWeil 4 eine gerade Zahl istgeradeWeil 4 eine gerade Zahl istZahlWeil 4 eine gerade Zahl istist": "Because 4 is an even number", "WeilWeil 26 größer als 4 ist26Weil 26 größer als 4 istgrößerWeil 26 größer als 4 istalsWeil 26 größer als 4 ist4Weil 26 größer als 4 istist": "Because 26 is greater than 4","Station 5 · Zahlenkasten": "Station 5 · Number box", "0 von 6 Stationen geschafft": "0 of 6 stations completed"};
+function uebersetzeDom(){
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  const liste=[]; let n;
+  while(n=w.nextNode()) liste.push(n);
+  liste.forEach(node=>{
+    const t=node.nodeValue; if(!t||!t.trim()) return;
+    const key=t.replace(/\s+/g,' ').trim();
+    if(MAP[key]!==undefined && node.__de===undefined){node.__de=t; uebersetzt.push(node); node.nodeValue=MAP[key];}
+  });
+}
+function zurueckDeutsch(){
+  uebersetzt.forEach(nd=>{nd.nodeValue=nd.__de; delete nd.__de;});
+  uebersetzt.length=0;
+}
+function toggleEng(){
+  engAktiv=!engAktiv;
+  const b=document.getElementById('btn-en');
+  if(engAktiv){uebersetzeDom(); if(b){b.textContent='Deutsch'; b.classList.add('aktiv');}}
+  else{zurueckDeutsch(); if(b){b.textContent='English'; b.classList.remove('aktiv');}}
+  const fb=document.getElementById('fb-box'); if(fb) fb.style.display='none';
+  updateF();
+}
+const mo=new MutationObserver(()=>{if(engAktiv) uebersetzeDom();});
+mo.observe(document.body,{childList:true,subtree:true});
+
+
+// ===== Stations-Stepper: ein Schritt sichtbar, mit Zurueck/Weiter =====
+function initSchritte(){
+  const m=document.getElementById('level-m');
+  if(!m || document.getElementById('sn-prev')) return;
+  const nav=document.createElement('div');
+  nav.className='schritt-nav';
+  nav.innerHTML='<button class="btn2" id="sn-prev" onclick="schrittNav(-1)">&#9664; Zur\u00fcck</button><span id="sn-stand" class="sn-stand"></span><button class="btn2" id="sn-next" onclick="schrittNav(1)">Weiter &#9654;</button>';
+  m.appendChild(nav);
+}
+function schrittListe(){
+  const lv=aktLevel||'e';
+  const cont=document.getElementById('level-'+lv);
+  let items=[];
+  if(cont) items=[...cont.children].filter(el=>el.classList && (el.classList.contains('einstieg')||el.classList.contains('aufgabe')));
+  const mk=document.getElementById('st-merke');
+  if(mk) items.push(mk);
+  const ck=document.querySelector('.check');
+  if(ck) items.push(ck);
+  return items;
+}
+function schrittLabel(j,items){
+  if(j<=0) return engAktiv?'Problem task':'Problemaufgabe';
+  if(j>=items.length-1) return engAktiv?'What can you do now?':'Was kannst du jetzt?';
+  return (engAktiv?'Station ':'Station Nr. ')+j;
+}
+function schrittUpdate(){
+  const lv=aktLevel||'e';
+  const cont=document.getElementById('level-'+lv);
+  if(!cont) return;
+  const items=schrittListe();
+  let idx=parseInt(cont.dataset.schritt||'0');
+  idx=Math.max(0,Math.min(items.length-1,idx));
+  items.forEach((el,i)=>{ el.style.display = i===idx?'':'none'; });
+  cont.querySelectorAll('.bruecke').forEach(b=>{ b.style.display=(idx===0&&b.dataset.offen)?'block':'none'; });
+  const p=document.getElementById('sn-prev'), n=document.getElementById('sn-next'), s=document.getElementById('sn-stand');
+  if(p){ p.style.visibility = idx===0?'hidden':'visible'; p.innerHTML = '&#9664; '+schrittLabel(idx-1,items); }
+  if(n){ n.style.visibility = idx===items.length-1?'hidden':'visible'; n.innerHTML = schrittLabel(idx+1,items)+' &#9654;'; }
+  if(s) s.textContent = (engAktiv?'Step ':'Schritt ')+(idx+1)+' / '+items.length;
+}
+function schrittNav(d){
+  const lv=aktLevel||'e';
+  const cont=document.getElementById('level-'+lv);
+  const items=schrittListe();
+  let idx=parseInt(cont.dataset.schritt||'0')+d;
+  idx=Math.max(0,Math.min(items.length-1,idx));
+  cont.dataset.schritt=idx;
+  schrittUpdate();
+  const m=document.getElementById('level-m');
+  (m||cont).scrollIntoView({behavior:'smooth',block:'start'});
+}
+initSchritte();
+schrittUpdate();
+
+</script>
+</body>
+</html>
